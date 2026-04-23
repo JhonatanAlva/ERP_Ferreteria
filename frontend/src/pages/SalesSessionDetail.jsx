@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../api/axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
@@ -34,7 +34,7 @@ function SalesSessionDetail() {
   const cargarSesion = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${id}`,
+        `/api/sesiones/${id}`,
       );
       setSession(res.data);
     } catch {
@@ -49,7 +49,7 @@ function SalesSessionDetail() {
   const cargarVentas = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${id}/ventas`,
+        `/api/sesiones/${id}/ventas`,
       );
       setVentas(res.data);
     } catch {
@@ -64,7 +64,7 @@ function SalesSessionDetail() {
   const cargarEstadisticas = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${id}/estadisticas`,
+        `/api/sesiones/${id}/estadisticas`,
       );
       setStats(res.data);
     } catch {
@@ -79,7 +79,7 @@ function SalesSessionDetail() {
   const cargarMovimientos = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${id}/movimientos`,
+        `/api/sesiones/${id}/movimientos`,
       );
       setMovimientos(res.data);
     } catch {
@@ -94,7 +94,7 @@ function SalesSessionDetail() {
   const verProductos = async (ventaId) => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/ventas/${ventaId}/productos`,
+        `/api/ventas/${ventaId}/productos`,
       );
 
       setProductosVenta(res.data);
@@ -130,7 +130,7 @@ function SalesSessionDetail() {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/ventas/${ventaId}/devolver`,
+        `/api/ventas/${ventaId}/devolver`,
       );
 
       toast.success("Venta devuelta correctamente");

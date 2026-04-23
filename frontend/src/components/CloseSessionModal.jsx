@@ -104,7 +104,7 @@ function CloseSessionModal({
 
             <button
               onClick={onConfirm}
-              disabled={!cashCounted}
+              disabled={cashCounted === "" || cashCounted === null}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded disabled:opacity-50"
             >
               Cerrar sesión

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../api/axios";
 import toast from "react-hot-toast";
 import OpenSessionModal from "../components/OpenSessionModal";
 
@@ -21,7 +21,7 @@ function PosSessions() {
   const cargarSesiones = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones`,
+        `/api/sesiones`,
       );
 
       setSessions(res.data);
@@ -47,13 +47,9 @@ function PosSessions() {
         return;
       }
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/sesiones`,
-        {
-          usuario_id: user.id,
-          monto_inicial: montoInicial,
-        },
-      );
+      const res = await axios.post(`/api/sesiones`, {
+        monto_inicial: montoInicial,
+      });
 
       setShowOpenModal(false);
 
@@ -77,7 +73,7 @@ function PosSessions() {
     const abierta = sessions.find((s) => s.estado === "abierta");
 
     if (abierta) {
-      toast.error("Ya hay una sesión abierta");
+      toast.error("Ya tienes una sesión abierta");
 
       return;
     }
@@ -205,11 +201,10 @@ function PosSessions() {
             <p className="text-sm">
               Estado:
               <span
-                className={`ml-2 font-bold ${
-                  sesion.estado === "abierta"
+                className={`ml-2 font-bold ${sesion.estado === "abierta"
                     ? "text-green-600"
                     : "text-gray-500"
-                }`}
+                  }`}
               >
                 {sesion.estado}
               </span>

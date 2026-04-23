@@ -22,6 +22,19 @@ exports.crearVenta = async (req, res) => {
 
     await client.query("BEGIN");
 
+    // ==========================
+    // FIX #4 — VALIDAR SESIÓN ACTIVA
+    // Evita registrar ventas en sesiones cerradas o inexistentes
+    // ==========================
+    const sesion = await client.query(
+      `SELECT id FROM sesiones_pos WHERE id = $1 AND estado = 'abierta'`,
+      [sesion_id]
+    );
+
+    if (sesion.rows.length === 0) {
+      throw new Error("La sesión POS no está activa");
+    }
+
     // determinar estado de pago
     const estado_pago = metodo_pago === "credito" ? "pendiente" : "pagado";
 
@@ -38,6 +51,21 @@ exports.crearVenta = async (req, res) => {
 
     if (metodo_pago === "credito") {
       montoPagado = 0;
+    }
+
+    // ==========================
+    // FIX #5 — RECALCULAR TOTAL EN EL SERVIDOR
+    // Evita que el frontend envíe un total manipulado
+    // ==========================
+    let totalCalculado = 0;
+
+    for (const p of productos) {
+      totalCalculado += Number(p.cantidad) * Number(p.precio);
+    }
+
+    // Tolerancia de 1 centavo por posibles redondeos de decimales
+    if (Math.abs(totalCalculado - Number(total)) > 0.01) {
+      throw new Error("El total no coincide con los productos enviados");
     }
 
     // ==========================
@@ -68,8 +96,10 @@ exports.crearVenta = async (req, res) => {
       const cantidad = Number(p.cantidad);
       const precio = Number(p.precio);
 
+      // FIX #1 — FOR UPDATE bloquea la fila durante la transacción
+      // Evita race condition cuando dos ventas ocurren al mismo tiempo
       const producto = await client.query(
-        `SELECT stock FROM productos WHERE id = $1`,
+        `SELECT stock FROM productos WHERE id = $1 FOR UPDATE`,
         [productoId],
       );
 
@@ -78,7 +108,7 @@ exports.crearVenta = async (req, res) => {
       }
 
       if (producto.rows[0].stock < cantidad) {
-        throw new Error("Stock insuficiente");
+        throw new Error(`Stock insuficiente para el producto ID ${productoId}`);
       }
 
       const subtotal = cantidad * precio;
@@ -121,13 +151,17 @@ exports.crearVenta = async (req, res) => {
       [total, sesion_id],
     );
 
+    // ==========================
     // REGISTRAR INGRESO DE CAJA
+    // FIX #2 — Se registra montoPagado, no total
+    // Ej: venta de Q80 pagada con Q100 → entra Q100 a caja, no Q80
+    // ==========================
     if (metodo_pago === "efectivo") {
       await client.query(
         `INSERT INTO movimientos_caja
      (sesion_id, tipo, monto, descripcion)
      VALUES ($1,'ingreso',$2,'Venta POS')`,
-        [sesion_id, total],
+        [sesion_id, montoPagado],
       );
     }
 
@@ -238,7 +272,7 @@ exports.detalleVenta = async (req, res) => {
   }
 };
 
-//Detalle de productos de una venta para sesión POS
+// Detalle de productos de una venta para sesión POS
 exports.productosVenta = async (req, res) => {
   const { id } = req.params;
 
@@ -329,7 +363,6 @@ exports.devolverVenta = async (req, res) => {
     // ==========================
     // MARCAR VENTA COMO DEVUELTA
     // ==========================
-    // marcar venta devuelta
     await client.query(
       `UPDATE ventas
    SET estado = 'devuelta',
@@ -339,17 +372,18 @@ exports.devolverVenta = async (req, res) => {
     );
 
     // ==========================
-    // AJUSTAR CAJA SOLO SI FUE EFECTIVO
+    // FIX #3 — AJUSTAR total_vendido SIEMPRE, NO SOLO EN EFECTIVO
+    // Una devolución de tarjeta o crédito también debe restar del total de la sesión
     // ==========================
+    await client.query(
+      `UPDATE sesiones_pos
+       SET total_vendido = total_vendido - $1
+       WHERE id = $2`,
+      [ventaData.total, ventaData.sesion_id],
+    );
 
+    // El movimiento de egreso en caja solo aplica si fue efectivo
     if (ventaData.metodo_pago === "efectivo") {
-      await client.query(
-        `UPDATE sesiones_pos
-     SET total_vendido = total_vendido - $1
-     WHERE id = $2`,
-        [ventaData.total, ventaData.sesion_id],
-      );
-
       await client.query(
         `INSERT INTO movimientos_caja
      (sesion_id, tipo, monto, descripcion)
