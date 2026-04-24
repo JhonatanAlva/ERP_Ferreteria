@@ -2,14 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const sesionesController = require("../controllers/sesiones.controller");
+const authMiddleware = require("../middleware/auth.middleware"); // ← agregar
 
-router.get("/", sesionesController.obtenerSesiones);
-router.get("/:id", sesionesController.obtenerSesion);
-router.get("/:id/resumen", sesionesController.resumenSesion);
-router.post("/", sesionesController.abrirSesion);
-router.put("/:id/cerrar", sesionesController.cerrarSesion);
-router.get("/:id/ventas", sesionesController.ventasSesion);
-router.get("/:id/estadisticas", sesionesController.estadisticasSesion);
-router.get("/:id/movimientos", sesionesController.movimientosCaja);
+router.get("/", authMiddleware, sesionesController.obtenerSesiones);
+router.get("/:id", authMiddleware, sesionesController.obtenerSesion);
+router.get("/:id/resumen", authMiddleware, sesionesController.resumenSesion);
+router.post("/", authMiddleware, sesionesController.abrirSesion);
+router.put("/:id/cerrar", authMiddleware, sesionesController.cerrarSesion);
+router.get("/:id/ventas", authMiddleware, sesionesController.ventasSesion);
+router.get("/:id/estadisticas", authMiddleware, sesionesController.estadisticasSesion);
+router.get("/:id/movimientos", authMiddleware, sesionesController.movimientosCaja);
 
 module.exports = router;

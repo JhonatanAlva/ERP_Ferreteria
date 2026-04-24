@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../api/axios";
 import toast from "react-hot-toast";
 import { usePos } from "../context/PosContext";
 import CloseSessionModal from "../components/CloseSessionModal";
@@ -13,7 +13,7 @@ function Sales() {
 
   const { setCartGlobal, setClienteGlobal } = usePos();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
 
   const [products, setProducts] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -49,7 +49,7 @@ CARGAR PRODUCTOS
   const cargarProductos = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/productos`,
+        `/api/productos`,
       );
 
       setProducts(res.data);
@@ -64,7 +64,7 @@ CARGAR CLIENTES
 
   const cargarClientes = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/clients`);
+      const res = await axios.get(`/clients`);
 
       setClientes(res.data);
     } catch {
@@ -79,7 +79,7 @@ RESUMEN CAJA
   const cargarResumenCaja = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${sessionId}/resumen`,
+        `/api/sesiones/${sessionId}/resumen`,
       );
 
       setResumenCaja(res.data);
@@ -214,17 +214,11 @@ MODAL CIERRE
 
   const confirmarCierre = async () => {
     try {
-      if (!user) {
-        toast.error("Usuario no encontrado");
-        return;
-      }
-
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/sesiones/${sessionId}/cerrar`,
+        `/api/sesiones/${sessionId}/cerrar`,
 
         {
           dinero_contado: cashCounted || 0,
-          usuario_id: user.id,
         },
       );
 
@@ -286,11 +280,10 @@ MODAL CIERRE
               <div
                 key={producto.id}
                 onClick={() => agregarCarrito(producto)}
-                className={`relative bg-white rounded-xl shadow-sm p-3 transition transform hover:scale-105 ${
-                  producto.stock === 0 || producto.estado === false
+                className={`relative bg-white rounded-xl shadow-sm p-3 transition transform hover:scale-105 ${producto.stock === 0 || producto.estado === false
                     ? "opacity-40"
                     : "cursor-pointer hover:shadow-lg"
-                }`}
+                  }`}
               >
                 {producto.estado === false && (
                   <span className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
