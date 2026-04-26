@@ -66,7 +66,7 @@ CARGAR CLIENTES
     try {
       const res = await axios.get(`/clients`);
 
-      setClientes(res.data);
+      setClientes(res.data.filter((c) => c.active));
     } catch {
       toast.error("Error cargando clientes");
     }

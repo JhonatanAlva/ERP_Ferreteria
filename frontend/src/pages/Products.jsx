@@ -34,13 +34,11 @@ function Products() {
 
     if (bajos.length > 0) {
       const nombres = bajos.map((p) => p.nombre).join(", ");
-
       toast.error(`⚠ Stock bajo: ${nombres}`, { duration: 5000 });
     }
 
     if (agotados.length > 0) {
       const nombres = agotados.map((p) => p.nombre).join(", ");
-
       toast.error(`⛔ Productos sin stock: ${nombres}`, { duration: 6000 });
     }
   };
@@ -55,7 +53,6 @@ function Products() {
       );
 
       setProducts(res.data);
-
       verificarStockBajo(res.data);
     } catch (error) {
       console.error(error);
@@ -88,7 +85,6 @@ function Products() {
       );
 
       toast.success("Producto desactivado");
-
       obtenerProductos();
     } catch (error) {
       toast.error("Error desactivando producto");
@@ -105,7 +101,6 @@ function Products() {
       );
 
       toast.success("Producto activado");
-
       obtenerProductos();
     } catch (error) {
       toast.error("Error activando producto");
@@ -132,14 +127,12 @@ function Products() {
   const productosOrdenados = [...productosFiltrados].sort((a, b) => {
     if (a.stock <= a.stock_minimo && b.stock > b.stock_minimo) return -1;
     if (a.stock > a.stock_minimo && b.stock <= b.stock_minimo) return 1;
-
     return 0;
   });
 
   // =========================
   // PAGINACION
   // =========================
-
   const indexLast = currentPage * productsPerPage;
   const indexFirst = indexLast - productsPerPage;
 
@@ -151,40 +144,67 @@ function Products() {
     setCurrentPage(1);
   }, [search, categoriaFiltro]);
 
+  const stockBajoCount = products.filter(
+    (p) => p.stock <= p.stock_minimo && p.stock > 0
+  ).length;
+  const sinStockCount = products.filter((p) => p.stock === 0).length;
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 md:p-10 space-y-6">
+
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Productos</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Inventario</p>
+          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Productos</h1>
+        </div>
 
         <button
           onClick={() => {
             setProductoEditar(null);
             setModalOpen(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-200"
         >
           + Nuevo producto
         </button>
       </div>
 
+      {/* STAT CHIPS DE ALERTA */}
+      {(stockBajoCount > 0 || sinStockCount > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {stockBajoCount > 0 && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-xs font-semibold text-amber-700">
+              ⚠️ {stockBajoCount} con stock bajo
+            </div>
+          )}
+          {sinStockCount > 0 && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-xs font-semibold text-red-700">
+              ⛔ {sinStockCount} sin stock
+            </div>
+          )}
+        </div>
+      )}
+
       {/* FILTROS */}
-      <div className="flex flex-wrap gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar nombre o código..."
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+          <input
+            type="text"
+            placeholder="Buscar nombre o código..."
+            className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
 
         <select
           value={categoriaFiltro}
           onChange={(e) => setCategoriaFiltro(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">Todas las categorías</option>
-
           {categorias.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.nombre}
@@ -194,11 +214,13 @@ function Products() {
       </div>
 
       {/* CHIPS CATEGORIAS */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setCategoriaFiltro("")}
-          className={`px-3 py-1 rounded-full text-sm border ${
-            categoriaFiltro === "" ? "bg-blue-600 text-white" : "bg-white"
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors duration-150 ${
+            categoriaFiltro === ""
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
           }`}
         >
           Todas
@@ -208,8 +230,10 @@ function Products() {
           <button
             key={cat.id}
             onClick={() => setCategoriaFiltro(cat.id)}
-            className={`px-3 py-1 rounded-full text-sm border ${
-              categoriaFiltro === cat.id ? "bg-blue-600 text-white" : "bg-white"
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors duration-150 ${
+              categoriaFiltro === cat.id
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
             }`}
           >
             {cat.nombre}
@@ -219,135 +243,139 @@ function Products() {
 
       {/* GRID PRODUCTOS */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {productosPagina.map((producto) => (
-          <div
-            key={producto.id}
-            className={`bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 ${
-              !producto.estado && "opacity-60"
-            }`}
-          >
-            {/* IMAGEN */}
-            <img
-              src={
-                producto.imagen
-                  ? `${import.meta.env.VITE_API_URL}/uploads/productos/${producto.imagen}`
-                  : "https://via.placeholder.com/150?text=Producto"
-              }
-              alt={producto.nombre}
-              className="w-full h-28 object-contain rounded-lg mb-3 bg-gray-50 p-2"
-            />
+        {productosPagina.map((producto) => {
+          const sinStock = producto.stock === 0;
+          const stockBajo = producto.stock <= producto.stock_minimo && producto.stock > 0;
 
-            {/* NOMBRE */}
-            <h3 className="text-sm font-semibold truncate">
-              {producto.nombre}
-            </h3>
-
-            {/* BADGE CATEGORIA */}
-            <span className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mt-1">
-              {producto.categoria_nombre}
-            </span>
-
-            {/* CODIGO */}
-            <p className="text-xs text-gray-500 mt-1">
-              Código: {producto.codigo}
-            </p>
-
-            {/* PRECIO */}
-            <p className="text-green-600 font-bold text-base mt-1">
-              Q {producto.precio}
-            </p>
-
-            {/* STOCK */}
-            <p
-              className={`text-xs font-semibold ${
-                producto.stock <= producto.stock_minimo
-                  ? "text-red-600"
-                  : producto.stock <= producto.stock_minimo * 2
-                    ? "text-yellow-600"
-                    : "text-green-600"
-              }`}
+          return (
+            <div
+              key={producto.id}
+              className={`bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col ${
+                !producto.estado ? "opacity-60" : ""
+              } ${sinStock ? "border-red-200" : stockBajo ? "border-amber-200" : "border-gray-200"}`}
             >
-              Stock: {producto.stock}
-            </p>
+              {/* IMAGEN */}
+              <div className="bg-gray-50 p-3">
+                <img
+                  src={
+                    producto.imagen
+                      ? `${import.meta.env.VITE_API_URL}/uploads/productos/${producto.imagen}`
+                      : "https://via.placeholder.com/150?text=Producto"
+                  }
+                  alt={producto.nombre}
+                  className="w-full h-28 object-contain rounded-lg"
+                />
+              </div>
 
-            {producto.stock <= producto.stock_minimo && producto.stock > 0 && (
-              <span className="text-xs text-red-500 font-semibold">
-                ⚠ Stock bajo
-              </span>
-            )}
+              {/* INFO */}
+              <div className="p-3 flex flex-col flex-1">
+                {/* BADGE CATEGORIA */}
+                <span className="inline-block text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-lg font-semibold mb-1.5 self-start">
+                  {producto.categoria_nombre}
+                </span>
 
-            {producto.stock === 0 && (
-              <span className="text-xs text-red-600 font-bold">
-                ⛔ Sin stock
-              </span>
-            )}
+                {/* NOMBRE */}
+                <h3 className="text-sm font-bold text-gray-800 truncate mb-0.5">
+                  {producto.nombre}
+                </h3>
 
-            {/* ESTADO */}
-            <p
-              className={`text-xs font-semibold ${
-                producto.estado ? "text-green-600" : "text-red-500"
-              }`}
-            >
-              {producto.estado ? "Activo" : "Inactivo"}
-            </p>
+                {/* CODIGO */}
+                <p className="text-xs text-gray-400 mb-2">
+                  {producto.codigo}
+                </p>
 
-            {/* BOTONES */}
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => {
-                  setProductoEditar(producto);
-                  setModalOpen(true);
-                }}
-                className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-xs py-1.5 rounded-md"
-              >
-                Editar
-              </button>
+                {/* PRECIO */}
+                <p className="text-emerald-600 font-black text-lg leading-none mb-2">
+                  Q {producto.precio}
+                </p>
 
-              {producto.estado ? (
-                <button
-                  onClick={() => desactivarProducto(producto.id)}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white text-xs py-1.5 rounded-md"
-                >
-                  Desactivar
-                </button>
-              ) : (
-                <button
-                  onClick={() => activarProducto(producto.id)}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs py-1.5 rounded-md"
-                >
-                  Activar
-                </button>
-              )}
+                {/* STOCK */}
+                <div className="flex items-center gap-1.5 mb-1">
+                  {sinStock ? (
+                    <span className="inline-flex items-center gap-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2 py-0.5 rounded-lg">
+                      ⛔ Sin stock
+                    </span>
+                  ) : stockBajo ? (
+                    <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 border border-amber-200 text-xs font-bold px-2 py-0.5 rounded-lg">
+                      ⚠️ Stock: {producto.stock}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-bold px-2 py-0.5 rounded-lg">
+                      Stock: {producto.stock}
+                    </span>
+                  )}
+                </div>
+
+                {/* ESTADO */}
+                <div className="flex items-center gap-1.5 mb-3">
+                  <span className={`w-1.5 h-1.5 rounded-full ${producto.estado ? "bg-emerald-500" : "bg-gray-400"}`}></span>
+                  <span className={`text-xs font-semibold ${producto.estado ? "text-emerald-600" : "text-gray-400"}`}>
+                    {producto.estado ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+
+                {/* BOTONES */}
+                <div className="flex gap-2 mt-auto">
+                  <button
+                    onClick={() => {
+                      setProductoEditar(producto);
+                      setModalOpen(true);
+                    }}
+                    className="flex-1 bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 text-xs font-semibold py-1.5 rounded-lg transition-colors duration-150"
+                  >
+                    Editar
+                  </button>
+
+                  {producto.estado ? (
+                    <button
+                      onClick={() => desactivarProducto(producto.id)}
+                      className="flex-1 bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 text-xs font-semibold py-1.5 rounded-lg transition-colors duration-150"
+                    >
+                      Desactivar
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => activarProducto(producto.id)}
+                      className="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold py-1.5 rounded-lg transition-colors duration-150"
+                    >
+                      Activar
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* PAGINACION */}
-      <div className="flex justify-between items-center mt-6">
-        <span className="text-sm text-gray-600">
-          Mostrando {indexFirst + 1}–
-          {Math.min(indexLast, productosOrdenados.length)} de{" "}
-          {productosOrdenados.length} productos
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-gray-500">
+          Mostrando{" "}
+          <span className="font-semibold text-gray-700">{indexFirst + 1}–{Math.min(indexLast, productosOrdenados.length)}</span>
+          {" "}de{" "}
+          <span className="font-semibold text-gray-700">{productosOrdenados.length}</span> productos
         </span>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            className="px-3 py-1 border rounded"
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-xs font-semibold border border-gray-200 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Anterior
+            ← Anterior
           </button>
 
-          <span className="px-3 py-1">
-            Página {currentPage} de {totalPages || 1}
+          <span className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-lg">
+            {currentPage} / {totalPages || 1}
           </span>
 
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            className="px-3 py-1 border rounded"
+            disabled={currentPage === totalPages || totalPages === 0}
+            className="px-3 py-1.5 text-xs font-semibold border border-gray-200 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Siguiente
+            Siguiente →
           </button>
         </div>
       </div>
