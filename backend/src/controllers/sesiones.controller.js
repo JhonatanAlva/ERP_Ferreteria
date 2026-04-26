@@ -121,31 +121,28 @@ exports.obtenerSesiones = async (req, res) => {
         s.monto_inicial,
         s.dinero_contado,
         u.name as usuario,
-
         COALESCE(
-          (
-            SELECT SUM(total)
-            FROM ventas
-            WHERE sesion_id = s.id
-            AND estado = 'activa'
-          ),0
+          (SELECT SUM(total) FROM ventas
+           WHERE sesion_id = s.id AND estado = 'activa'), 0
         ) as total_vendido
-
       FROM sesiones_pos s
       LEFT JOIN users u ON s.usuario_id = u.id
-      ${esAdmin ? "" : "WHERE s.usuario_id = $1"}
+      WHERE (
+        -- Sesión activa: solo el dueño la ve, sin importar el rol
+        (s.estado = 'abierta' AND s.usuario_id = $1)
+        OR
+        -- Sesiones cerradas: admin ve todas, empleado solo las suyas
+        (s.estado = 'cerrada' AND ($2 = true OR s.usuario_id = $1))
+      )
       ORDER BY s.id DESC
       `,
-      esAdmin ? [] : [usuario_id],
+      [usuario_id, esAdmin]
     );
 
     res.json(result.rows);
   } catch (error) {
     console.log(error);
-
-    res.status(500).json({
-      error: "Error obteniendo sesiones",
-    });
+    res.status(500).json({ error: "Error obteniendo sesiones" });
   }
 };
 

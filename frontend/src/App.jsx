@@ -28,12 +28,10 @@ import { PosProvider } from "./context/PosContext";
 function Layout() {
   const location = useLocation();
 
-  // 🔥 USER REACTIVO
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user"))
   );
 
-  // 🔥 ESCUCHA CAMBIOS DE LOGIN
   useEffect(() => {
     const handleStorage = () => {
       setUser(JSON.parse(localStorage.getItem("user")));

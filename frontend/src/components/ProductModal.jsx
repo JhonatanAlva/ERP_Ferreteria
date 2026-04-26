@@ -86,17 +86,11 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
   const handleChange = (e) => {
     if (e.target.name === "categoria_id" && e.target.value === "nueva") {
       setMostrarNuevaCategoria(true);
-      setForm({
-        ...form,
-        categoria_id: "",
-      });
+      setForm({ ...form, categoria_id: "" });
       return;
     }
 
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // =============================
@@ -108,7 +102,6 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
     if (!file) return;
 
     setImagen(file);
-
     setPreview(URL.createObjectURL(file));
   };
 
@@ -123,7 +116,6 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
     try {
       let categoriaId = form.categoria_id;
 
-      // crear nueva categoria
       if (mostrarNuevaCategoria && nuevaCategoria) {
         const res = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/categorias`,
@@ -172,129 +164,190 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
 
   if (!isOpen) return null;
 
+  const inputClass =
+    "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition";
+
+  const labelClass =
+    "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5";
+
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          {editMode ? "Editar producto" : "Nuevo producto"}
-        </h2>
+    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            name="codigo"
-            value={form.codigo}
-            onChange={handleChange}
-            placeholder="Código"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-            required
-          />
-
-          <input
-            name="nombre"
-            value={form.nombre}
-            onChange={handleChange}
-            placeholder="Nombre"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-            required
-          />
-
-          {/* SELECT CATEGORIA */}
-          <select
-            name="categoria_id"
-            value={form.categoria_id}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-800">
+              {editMode ? "Editar producto" : "Nuevo producto"}
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {editMode ? "Modifica los datos del producto" : "Completa la información del producto"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none transition-colors"
           >
-            <option value="">Seleccionar categoría</option>
+            ×
+          </button>
+        </div>
 
-            {categorias.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.nombre}
-              </option>
-            ))}
+        {/* BODY — scrollable */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
 
-            <option value="nueva">➕ Nueva categoría</option>
-          </select>
-          {mostrarNuevaCategoria && (
-            <input
-              value={nuevaCategoria}
-              onChange={(e) => setNuevaCategoria(e.target.value)}
-              placeholder="Nombre de nueva categoría"
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            />
-          )}
+            {/* IMAGEN PREVIEW + UPLOAD */}
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {preview ? (
+                  <img src={preview} alt="preview" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <span className="text-3xl">📦</span>
+                )}
+              </div>
+              <div>
+                <label className={labelClass}>Imagen del producto</label>
+                <label className="inline-flex items-center gap-2 cursor-pointer bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
+                  Subir imagen
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImage}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              name="precio"
-              type="number"
-              value={form.precio}
-              onChange={handleChange}
-              placeholder="Precio"
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Código</label>
+                <input
+                  name="codigo"
+                  value={form.codigo}
+                  onChange={handleChange}
+                  placeholder="Ej. PROD-001"
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Nombre</label>
+                <input
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  placeholder="Nombre del producto"
+                  className={inputClass}
+                  required
+                />
+              </div>
+            </div>
 
-            <input
-              name="costo"
-              type="number"
-              value={form.costo}
-              onChange={handleChange}
-              placeholder="Costo"
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
+            {/* CATEGORIA */}
+            <div>
+              <label className={labelClass}>Categoría</label>
+              <select
+                name="categoria_id"
+                value={form.categoria_id}
+                onChange={handleChange}
+                className={inputClass}
+              >
+                <option value="">Seleccionar categoría</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
+                <option value="nueva">➕ Nueva categoría</option>
+              </select>
+            </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              name="stock"
-              type="number"
-              value={form.stock}
-              onChange={handleChange}
-              placeholder="Stock"
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-
-            <input
-              name="stock_minimo"
-              type="number"
-              value={form.stock_minimo}
-              onChange={handleChange}
-              placeholder="Stock mínimo"
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-
-          <textarea
-            name="descripcion"
-            value={form.descripcion}
-            onChange={handleChange}
-            placeholder="Descripción"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
-
-          {/* IMAGEN */}
-          <div className="space-y-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              className="text-sm"
-            />
-
-            {preview && (
-              <img
-                src={preview}
-                alt="preview"
-                className="h-24 object-contain border rounded"
-              />
+            {mostrarNuevaCategoria && (
+              <div>
+                <label className={labelClass}>Nueva categoría</label>
+                <input
+                  value={nuevaCategoria}
+                  onChange={(e) => setNuevaCategoria(e.target.value)}
+                  placeholder="Nombre de la nueva categoría"
+                  className={inputClass}
+                />
+              </div>
             )}
+
+            {/* PRECIO / COSTO */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Precio (Q)</label>
+                <input
+                  name="precio"
+                  type="number"
+                  value={form.precio}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Costo (Q)</label>
+                <input
+                  name="costo"
+                  type="number"
+                  value={form.costo}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            {/* STOCK */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Stock actual</label>
+                <input
+                  name="stock"
+                  type="number"
+                  value={form.stock}
+                  onChange={handleChange}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Stock mínimo</label>
+                <input
+                  name="stock_minimo"
+                  type="number"
+                  value={form.stock_minimo}
+                  onChange={handleChange}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            {/* DESCRIPCION */}
+            <div>
+              <label className={labelClass}>Descripción</label>
+              <textarea
+                name="descripcion"
+                value={form.descripcion}
+                onChange={handleChange}
+                placeholder="Descripción opcional del producto..."
+                rows={3}
+                className={`${inputClass} resize-none`}
+              />
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3">
+          {/* FOOTER */}
+          <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm bg-gray-200 rounded-lg"
+              className="px-5 py-2.5 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
             >
               Cancelar
             </button>
@@ -302,9 +355,9 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg"
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
             >
-              {loading ? "Guardando..." : editMode ? "Actualizar" : "Crear"}
+              {loading ? "Guardando..." : editMode ? "Actualizar" : "Crear producto"}
             </button>
           </div>
         </form>
