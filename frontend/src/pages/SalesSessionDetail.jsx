@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
@@ -27,7 +27,7 @@ function SalesSessionDetail() {
 
   const cargarSesion = async () => {
     try {
-      const res = await axios.get(`/api/sesiones/${id}`);
+      const res = await api.get(`/api/sesiones/${id}`);
       setSession(res.data);
     } catch {
       toast.error("Error cargando sesión");
@@ -36,7 +36,7 @@ function SalesSessionDetail() {
 
   const cargarVentas = async () => {
     try {
-      const res = await axios.get(`/api/sesiones/${id}/ventas`);
+      const res = await api.get(`/api/sesiones/${id}/ventas`);
       setVentas(res.data);
     } catch {
       toast.error("Error cargando ventas");
@@ -45,7 +45,7 @@ function SalesSessionDetail() {
 
   const cargarEstadisticas = async () => {
     try {
-      const res = await axios.get(`/api/sesiones/${id}/estadisticas`);
+      const res = await api.get(`/api/sesiones/${id}/estadisticas`);
       setStats(res.data);
     } catch {
       toast.error("Error cargando estadísticas");
@@ -54,7 +54,7 @@ function SalesSessionDetail() {
 
   const cargarMovimientos = async () => {
     try {
-      const res = await axios.get(`/api/sesiones/${id}/movimientos`);
+      const res = await api.get(`/api/sesiones/${id}/movimientos`);
       setMovimientos(res.data);
     } catch {
       toast.error("Error cargando movimientos de caja");
@@ -63,7 +63,7 @@ function SalesSessionDetail() {
 
   const verProductos = async (ventaId) => {
     try {
-      const res = await axios.get(`/api/ventas/${ventaId}/productos`);
+      const res = await api.get(`/api/ventas/${ventaId}/productos`);
       setProductosVenta(res.data);
       setVentaActual(ventaId);
       setShowProductos(true);
@@ -90,7 +90,7 @@ function SalesSessionDetail() {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.put(`/api/ventas/${ventaId}/devolver`);
+      await api.put(`/api/ventas/${ventaId}/devolver`);
       toast.success("Venta devuelta correctamente");
       cargarVentas();
       cargarSesion();

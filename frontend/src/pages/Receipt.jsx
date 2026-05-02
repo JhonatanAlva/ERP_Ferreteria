@@ -1,6 +1,6 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 function Receipt() {
   const { id } = useParams();
@@ -15,8 +15,8 @@ function Receipt() {
   const sessionId = params.get("session");
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/ventas/${id}/recibo`)
+    api
+      .get(`/api/ventas/${id}/recibo`)
       .then((res) => {
         setVenta(res.data.venta);
         setProductos(res.data.productos);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 
 function Clients() {
@@ -16,24 +16,16 @@ function Clients() {
     address: "",
   });
 
-  const token = localStorage.getItem("token");
-  const API = `${import.meta.env.VITE_API_URL}/clients`;
-
   const [currentPage, setCurrentPage] = useState(1);
   const clientsPerPage = 10;
 
   // =========================
   // OBTENER CLIENTES
   // =========================
-
   const getClients = async () => {
     try {
-      const res = await axios.get(API, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      // ✅ api ya tiene el token — sin headers manuales, sin VITE_API_URL
+      const res = await api.get("/clients");
       setClients(res.data);
     } catch {
       toast.error("Error obteniendo clientes");
@@ -47,21 +39,10 @@ function Clients() {
   // =========================
   // CREAR CLIENTE
   // =========================
-
   const createClient = async () => {
     try {
-      await axios.post(
-        API,
-        { ...form, company_id: 1 },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
+      await api.post("/clients", { ...form, company_id: 1 });
       toast.success("Cliente creado");
-
       closeModal();
       getClients();
     } catch {
@@ -72,17 +53,10 @@ function Clients() {
   // =========================
   // EDITAR CLIENTE
   // =========================
-
   const updateClient = async () => {
     try {
-      await axios.put(`${API}/${editingClient.id}`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await api.put(`/clients/${editingClient.id}`, form);
       toast.success("Cliente actualizado");
-
       closeModal();
       getClients();
     } catch {
@@ -93,21 +67,10 @@ function Clients() {
   // =========================
   // DESACTIVAR CLIENTE
   // =========================
-
   const deactivateClient = async (id) => {
     try {
-      await axios.put(
-        `${API}/${id}/deactivate`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
+      await api.put(`/clients/${id}/deactivate`, {});
       toast.success("Cliente desactivado");
-
       getClients();
     } catch {
       toast.error("Error desactivando cliente");
@@ -117,21 +80,10 @@ function Clients() {
   // =========================
   // REACTIVAR CLIENTE
   // =========================
-
   const reactivateClient = async (id) => {
     try {
-      await axios.put(
-        `${API}/${id}/reactivate`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
+      await api.put(`/clients/${id}/reactivate`, {});
       toast.success("Cliente reactivado");
-
       getClients();
     } catch {
       toast.error("Error reactivando cliente");
@@ -141,41 +93,28 @@ function Clients() {
   // =========================
   // MODAL
   // =========================
-
   const openCreateModal = () => {
     setEditingClient(null);
-
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      address: "",
-    });
-
+    setForm({ name: "", phone: "", email: "", address: "" });
     setModalOpen(true);
   };
 
   const openEditModal = (client) => {
     setEditingClient(client);
-
     setForm({
       name: client.name,
       phone: client.phone,
       email: client.email,
       address: client.address,
     });
-
     setModalOpen(true);
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
-  };
+  const closeModal = () => setModalOpen(false);
 
   // =========================
   // FILTRO
   // =========================
-
   const filteredClients = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -183,16 +122,10 @@ function Clients() {
   // =========================
   // PAGINACION
   // =========================
-
-  const indexOfLastClient = currentPage * clientsPerPage;
+  const indexOfLastClient  = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
-
-  const currentClients = filteredClients.slice(
-    indexOfFirstClient,
-    indexOfLastClient,
-  );
-
-  const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
+  const currentClients     = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
+  const totalPages         = Math.ceil(filteredClients.length / clientsPerPage);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -207,7 +140,6 @@ function Clients() {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Gestión</p>
           <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Clientes</h1>
         </div>
-
         <div className="flex gap-3">
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
@@ -243,7 +175,6 @@ function Clients() {
                 <th className="px-5 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-gray-100">
               {currentClients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-50 transition-colors duration-100">
@@ -251,7 +182,6 @@ function Clients() {
                   <td className="px-5 py-3.5 text-sm text-gray-600">{client.phone}</td>
                   <td className="px-5 py-3.5 text-sm text-gray-600">{client.email}</td>
                   <td className="px-5 py-3.5 text-sm text-gray-600">{client.address}</td>
-
                   <td className="px-5 py-3.5">
                     {client.credito_pendiente > 0 ? (
                       <span className="inline-flex items-center bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-lg">
@@ -263,48 +193,37 @@ function Clients() {
                       </span>
                     )}
                   </td>
-
                   <td className="px-5 py-3.5">
                     {client.active ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                        Activo
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Activo
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-                        Inactivo
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactivo
                       </span>
                     )}
                   </td>
-
                   <td className="px-5 py-3.5">
                     <div className="flex gap-2 justify-center">
                       {client.credito_pendiente > 0 ? (
                         <button
-                          onClick={() =>
-                            (window.location.href = `/clients/${client.id}/creditos`)
-                          }
+                          onClick={() => (window.location.href = `/clients/${client.id}/creditos`)}
                           className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors duration-150"
                         >
                           Ver créditos
                         </button>
                       ) : (
-                        <button
-                          disabled
-                          className="bg-gray-100 text-gray-400 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-not-allowed"
-                        >
+                        <button disabled className="bg-gray-100 text-gray-400 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-not-allowed">
                           Sin deuda
                         </button>
                       )}
-
                       <button
                         onClick={() => openEditModal(client)}
                         className="bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors duration-150"
                       >
                         Editar
                       </button>
-
                       {client.active ? (
                         <button
                           onClick={() => deactivateClient(client.id)}
@@ -332,14 +251,10 @@ function Clients() {
         <div className="flex justify-between items-center px-5 py-4 border-t border-gray-100 bg-gray-50">
           <span className="text-xs text-gray-500">
             Mostrando{" "}
-            <span className="font-semibold text-gray-700">
-              {indexOfFirstClient + 1}–{Math.min(indexOfLastClient, filteredClients.length)}
-            </span>{" "}
-            de{" "}
-            <span className="font-semibold text-gray-700">{filteredClients.length}</span>{" "}
-            clientes
+            <span className="font-semibold text-gray-700">{indexOfFirstClient + 1}–{Math.min(indexOfLastClient, filteredClients.length)}</span>
+            {" "}de{" "}
+            <span className="font-semibold text-gray-700">{filteredClients.length}</span> clientes
           </span>
-
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -348,11 +263,9 @@ function Clients() {
             >
               ← Anterior
             </button>
-
             <span className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-lg">
               {currentPage} / {totalPages || 1}
             </span>
-
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
@@ -368,8 +281,6 @@ function Clients() {
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-
-            {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div>
                 <h2 className="text-lg font-extrabold text-gray-800">
@@ -379,62 +290,27 @@ function Clients() {
                   {editingClient ? "Modifica los datos del cliente" : "Completa la información del cliente"}
                 </p>
               </div>
-              <button
-                onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none transition-colors"
-              >
-                ×
-              </button>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none transition-colors">×</button>
             </div>
-
-            {/* Modal body */}
             <div className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nombre</label>
-                <input
-                  type="text"
-                  placeholder="Ej. Juan García"
-                  className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Teléfono</label>
-                <input
-                  type="text"
-                  placeholder="Ej. 5555-1234"
-                  className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
-                <input
-                  type="email"
-                  placeholder="correo@ejemplo.com"
-                  className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Dirección</label>
-                <input
-                  type="text"
-                  placeholder="Ciudad, zona..."
-                  className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                />
-              </div>
+              {[
+                { label: "Nombre",    key: "name",    type: "text",  placeholder: "Ej. Juan García" },
+                { label: "Teléfono",  key: "phone",   type: "text",  placeholder: "Ej. 5555-1234" },
+                { label: "Email",     key: "email",   type: "email", placeholder: "correo@ejemplo.com" },
+                { label: "Dirección", key: "address", type: "text",  placeholder: "Ciudad, zona..." },
+              ].map(({ label, key, type, placeholder }) => (
+                <div key={key}>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">{label}</label>
+                  <input
+                    type={type}
+                    placeholder={placeholder}
+                    className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+                    value={form[key]}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  />
+                </div>
+              ))}
             </div>
-
-            {/* Modal footer */}
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
               <button
                 onClick={closeModal}
@@ -442,7 +318,6 @@ function Clients() {
               >
                 Cancelar
               </button>
-
               <button
                 onClick={editingClient ? updateClient : createClient}
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"

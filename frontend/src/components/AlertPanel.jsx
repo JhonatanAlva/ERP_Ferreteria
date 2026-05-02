@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 function AlertPanel() {
   const [alertas, setAlertas] = useState({
@@ -14,7 +14,7 @@ function AlertPanel() {
 
   const cargarAlertas = async () => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `${import.meta.env.VITE_API_URL}/api/productos`,
       );
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 import { usePos } from "../context/PosContext";
 import CloseSessionModal from "../components/CloseSessionModal";
@@ -48,7 +48,7 @@ CARGAR PRODUCTOS
 
   const cargarProductos = async () => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `/api/productos`,
       );
 
@@ -64,7 +64,7 @@ CARGAR CLIENTES
 
   const cargarClientes = async () => {
     try {
-      const res = await axios.get(`/clients`);
+      const res = await api.get(`/clients`);
 
       setClientes(res.data.filter((c) => c.active));
     } catch {
@@ -78,7 +78,7 @@ RESUMEN CAJA
 
   const cargarResumenCaja = async () => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `/api/sesiones/${sessionId}/resumen`,
       );
 
@@ -214,7 +214,7 @@ MODAL CIERRE
 
   const confirmarCierre = async () => {
     try {
-      await axios.put(
+      await api.put(
         `/api/sesiones/${sessionId}/cerrar`,
 
         {

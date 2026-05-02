@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 import OpenSessionModal from "../components/OpenSessionModal";
 
@@ -20,7 +20,7 @@ function PosSessions() {
 
   const cargarSesiones = async () => {
     try {
-      const res = await axios.get(`/api/sesiones`);
+      const res = await api.get("/api/sesiones");
       setSessions(res.data);
     } catch {
       toast.error("Error cargando sesiones");
@@ -44,7 +44,7 @@ function PosSessions() {
         return;
       }
 
-      const res = await axios.post(`/api/sesiones`, {
+      const res = await api.post("/api/sesiones", {
         monto_inicial: montoInicial,
       });
 

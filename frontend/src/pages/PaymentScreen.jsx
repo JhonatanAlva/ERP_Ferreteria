@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { usePos } from "../context/PosContext";
-import axios from "axios";
+import api from "../api/axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -86,16 +86,14 @@ REGISTRAR VENTA
         montoPagado = 0;
       }
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/ventas`,
-        {
-          sesion_id: id,
-          cliente_id: cliente?.id || null,
-          metodo_pago: metodo,
-          productos: cart,
-          total,
-          monto_pagado: montoPagado,
-        },
+      const res = await api.post("/api/ventas", {
+        sesion_id: id,
+        cliente_id: cliente?.id || null,
+        metodo_pago: metodo,
+        productos: cart,
+        total,
+        monto_pagado: montoPagado,
+      },
       );
 
       toast.success("Venta registrada");
@@ -262,9 +260,8 @@ UI
             <span>Cambio</span>
 
             <span
-              className={`font-bold ${
-                cambio >= 0 ? "text-green-600" : "text-red-500"
-              }`}
+              className={`font-bold ${cambio >= 0 ? "text-green-600" : "text-red-500"
+                }`}
             >
               Q {cambio.toFixed(2)}
             </span>
