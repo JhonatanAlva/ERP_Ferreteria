@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -27,12 +27,8 @@ function Dashboard() {
 
   const cargarStats = async () => {
     try {
-      const resProductos = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/productos`
-      );
-      const resClientes = await axios.get(
-        `${import.meta.env.VITE_API_URL}/clients`
-      );
+      const resProductos = await api.get("/api/productos");
+      const resClientes = await api.get("/clients");
 
       const productos = resProductos.data;
       const clientes = resClientes.data;

@@ -3,53 +3,31 @@ const router = express.Router();
 
 const productosController = require("../controllers/productos.controller");
 const upload = require("../middleware/uploadProducto");
-
+const { authMiddleware } = require("../middleware/auth.middleware");
 
 // =============================
 // OBTENER PRODUCTOS
 // =============================
-router.get(
-  "/",
-  productosController.obtenerProductos
-);
-
+router.get("/", authMiddleware, productosController.obtenerProductos);
 
 // =============================
 // CREAR PRODUCTO
 // =============================
-router.post(
-  "/",
-  upload.single("imagen"),
-  productosController.crearProducto
-);
-
+router.post("/", authMiddleware, upload.single("imagen"), productosController.crearProducto);
 
 // =============================
 // EDITAR PRODUCTO
 // =============================
-router.put(
-  "/:id",
-  upload.single("imagen"),
-  productosController.editarProducto
-);
-
+router.put("/:id", authMiddleware, upload.single("imagen"), productosController.editarProducto);
 
 // =============================
 // DESACTIVAR PRODUCTO
 // =============================
-router.patch(
-  "/desactivar/:id",
-  productosController.desactivarProducto
-);
-
+router.patch("/desactivar/:id", authMiddleware, productosController.desactivarProducto);
 
 // =============================
 // ACTIVAR PRODUCTO
 // =============================
-router.patch(
-  "/activar/:id",
-  productosController.activarProducto
-);
-
+router.patch("/activar/:id", authMiddleware, productosController.activarProducto);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -17,14 +17,14 @@ function Users() {
   const token = localStorage.getItem("token");
 
   async function loadUsers() {
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
+    const res = await api.get(`${import.meta.env.VITE_API_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setUsers(res.data);
   }
 
   async function loadRoles() {
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/roles`, {
+    const res = await api.get(`${import.meta.env.VITE_API_URL}/api/roles`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setRoles(res.data);
@@ -53,13 +53,13 @@ function Users() {
 
   async function saveUser() {
     if (editingUser) {
-      await axios.put(
+      await api.put(
         `${import.meta.env.VITE_API_URL}/api/users/${editingUser.id}`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } else {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/users`, form, {
+      await api.post(`${import.meta.env.VITE_API_URL}/api/users`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
     }
@@ -68,7 +68,7 @@ function Users() {
   }
 
   async function toggleUser(id) {
-    await axios.patch(
+    await api.patch(
       `${import.meta.env.VITE_API_URL}/api/users/${id}/status`,
       {},
       { headers: { Authorization: `Bearer ${token}` } }

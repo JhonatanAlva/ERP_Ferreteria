@@ -21,8 +21,9 @@ function Login() {
         { email, password }
       );
 
-      const { token, user } = response.data;
-      localStorage.setItem("token", token);
+      // El backend ahora responde "accessToken", no "token"
+      const { accessToken, user } = response.data;
+      localStorage.setItem("token", accessToken);
       localStorage.setItem("user", JSON.stringify(user));
       window.dispatchEvent(new Event("storage"));
 

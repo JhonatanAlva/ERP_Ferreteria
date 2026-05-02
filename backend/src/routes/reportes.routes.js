@@ -2,34 +2,35 @@ const express = require("express");
 const router = express.Router();
 
 const reportesController = require("../controllers/reportes.controller");
+const { authMiddleware } = require("../middleware/auth.middleware");
 
 // ventas
-router.get("/ventas", reportesController.reporteVentas);
-router.get("/ventas-por-dia", reportesController.ventasPorDia);
+router.get("/ventas", authMiddleware, reportesController.reporteVentas);
+router.get("/ventas-por-dia", authMiddleware, reportesController.ventasPorDia);
 
 // productos
-router.get("/productos-mas-vendidos", reportesController.productosMasVendidos);
-router.get("/productos-stock-bajo", reportesController.productosStockBajo);
-router.get("/productos-sin-stock", reportesController.productosSinStock);
-router.get("/productos-sin-movimiento", reportesController.productosSinMovimiento);
+router.get("/productos-mas-vendidos", authMiddleware, reportesController.productosMasVendidos);
+router.get("/productos-stock-bajo", authMiddleware, reportesController.productosStockBajo);
+router.get("/productos-sin-stock", authMiddleware, reportesController.productosSinStock);
+router.get("/productos-sin-movimiento", authMiddleware, reportesController.productosSinMovimiento);
 
 // stock
-router.get("/stock", reportesController.reporteStock);
+router.get("/stock", authMiddleware, reportesController.reporteStock);
 
 // clientes
-router.get("/clientes-top", reportesController.clientesTop);
+router.get("/clientes-top", authMiddleware, reportesController.clientesTop);
 
 // pagos
-router.get("/metodos-pago", reportesController.metodosPago);
+router.get("/metodos-pago", authMiddleware, reportesController.metodosPago);
 
 // sesiones
-router.get("/sesiones", reportesController.reporteSesiones);
+router.get("/sesiones", authMiddleware, reportesController.reporteSesiones);
 
 // recomendaciones
-router.get("/recomendaciones", reportesController.recomendaciones);
+router.get("/recomendaciones", authMiddleware, reportesController.recomendaciones);
 
 // exportar
-router.get("/exportar/excel", reportesController.exportarExcel);
-router.get("/exportar/pdf", reportesController.exportarPDF);
+router.get("/exportar/excel", authMiddleware, reportesController.exportarExcel);
+router.get("/exportar/pdf", authMiddleware, reportesController.exportarPDF);
 
 module.exports = router;

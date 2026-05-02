@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 
 function ProductModal({ isOpen, onClose, onSaved, product }) {
@@ -30,7 +30,7 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
   // =============================
   const cargarCategorias = async () => {
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `${import.meta.env.VITE_API_URL}/api/categorias`,
       );
 
@@ -117,7 +117,7 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
       let categoriaId = form.categoria_id;
 
       if (mostrarNuevaCategoria && nuevaCategoria) {
-        const res = await axios.post(
+        const res = await api.post(
           `${import.meta.env.VITE_API_URL}/api/categorias`,
           { nombre: nuevaCategoria },
         );
@@ -140,14 +140,14 @@ function ProductModal({ isOpen, onClose, onSaved, product }) {
       }
 
       if (editMode) {
-        await axios.put(
+        await api.put(
           `${import.meta.env.VITE_API_URL}/api/productos/${product.id}`,
           data,
         );
 
         toast.success("Producto actualizado");
       } else {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/productos`, data);
+        await api.post(`${import.meta.env.VITE_API_URL}/api/productos`, data);
 
         toast.success("Producto creado");
       }

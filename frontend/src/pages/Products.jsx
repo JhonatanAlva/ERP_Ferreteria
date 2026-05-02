@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 import ProductModal from "../components/ProductModal";
 
@@ -48,9 +48,7 @@ function Products() {
   // =========================
   const obtenerProductos = async () => {
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/productos`,
-      );
+      const res = await api.get("/api/productos");
 
       setProducts(res.data);
       verificarStockBajo(res.data);
@@ -65,9 +63,7 @@ function Products() {
   // =========================
   const obtenerCategorias = async () => {
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/categorias`,
-      );
+      const res = await api.get("/api/categorias");
 
       setCategorias(res.data);
     } catch (error) {
@@ -80,9 +76,7 @@ function Products() {
   // =========================
   const desactivarProducto = async (id) => {
     try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/productos/desactivar/${id}`,
-      );
+      await api.patch(`/api/productos/desactivar/${id}`);
 
       toast.success("Producto desactivado");
       obtenerProductos();
@@ -96,9 +90,7 @@ function Products() {
   // =========================
   const activarProducto = async (id) => {
     try {
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/productos/activar/${id}`,
-      );
+      await api.patch(`/api/productos/activar/${id}`);
 
       toast.success("Producto activado");
       obtenerProductos();

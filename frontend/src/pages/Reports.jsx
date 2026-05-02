@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 import ReportCard from "../components/ReportCard";
 import ReportChart from "../components/ReportChart";
@@ -63,7 +63,7 @@ const Reports = () => {
     const API = import.meta.env.VITE_API_URL;
     const rango = obtenerRango();
 
-    const res = await axios.get(
+    const res = await api.get(
       `${API}/reportes/exportar/excel?desde=${rango.desde}&hasta=${rango.hasta}`,
       {
         responseType: "blob",
@@ -83,7 +83,7 @@ const Reports = () => {
     const API = import.meta.env.VITE_API_URL;
     const rango = obtenerRango();
 
-    const res = await axios.get(
+    const res = await api.get(
       `${API}/reportes/exportar/pdf?desde=${rango.desde}&hasta=${rango.hasta}`,
       {
         responseType: "blob",
@@ -119,11 +119,11 @@ const Reports = () => {
         ventasDiaRes,
         recomendacionesRes,
       ] = await Promise.all([
-        axios.get(`${API}/reportes/ventas?desde=${rango.desde}&hasta=${rango.hasta}`, headers),
-        axios.get(`${API}/reportes/stock`, headers),
-        axios.get(`${API}/reportes/productos-mas-vendidos?categoria=${categoriaSeleccionada}`, headers),
-        axios.get(`${API}/reportes/ventas-por-dia?desde=${rango.desde}&hasta=${rango.hasta}`, headers),
-        axios.get(`${API}/reportes/recomendaciones`, headers),
+        api.get(`${API}/reportes/ventas?desde=${rango.desde}&hasta=${rango.hasta}`, headers),
+        api.get(`${API}/reportes/stock`, headers),
+        api.get(`${API}/reportes/productos-mas-vendidos?categoria=${categoriaSeleccionada}`, headers),
+        api.get(`${API}/reportes/ventas-por-dia?desde=${rango.desde}&hasta=${rango.hasta}`, headers),
+        api.get(`${API}/reportes/recomendaciones`, headers),
       ]);
 
       setVentas(ventasRes.data);
@@ -143,7 +143,7 @@ const Reports = () => {
     try {
       const API = import.meta.env.VITE_API_URL;
 
-      const res = await axios.get(`${API}/api/categorias`, {
+      const res = await api.get(`${API}/api/categorias`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

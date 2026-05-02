@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 import toast from "react-hot-toast";
 
 function ClientCredits() {
@@ -24,8 +24,8 @@ function ClientCredits() {
 
   const obtenerCreditos = async () => {
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/creditos/cliente/${id}`,
+      const res = await api.get(
+        `/api/creditos/cliente/${id}`
       );
 
       setCreditos(res.data);
@@ -59,7 +59,7 @@ function ClientCredits() {
   const pagarTodo = async () => {
     try {
       for (const c of creditos) {
-        await axios.post(`${import.meta.env.VITE_API_URL}/api/creditos/pagar`, {
+        await api.post("/api/creditos/pagar", {
           venta_id: c.id,
           cliente_id: id,
           monto: c.saldo,
@@ -90,7 +90,7 @@ function ClientCredits() {
 
   const pagarCredito = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/creditos/pagar`, {
+      await api.post("/api/creditos/pagar", {
         venta_id: ventaSeleccionada.id,
         cliente_id: id,
         monto: Number(monto),
